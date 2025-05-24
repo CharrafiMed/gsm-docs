@@ -1,7 +1,7 @@
 
 ## Customize modal behaviors
 
-###  Close by escaping : 
+###  Close by escaping
 by default this plugin comes with close-by escaping enabled, if  you want to  customize the close-by escaping behavior you can do it like so : 
 ```php
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
@@ -16,7 +16,7 @@ public function panel(Panel $panel): Panel
         ])
 }
 ```
-###  Close by clicking away :
+###  Close by clicking away
 by default this plugin comes with a modal that can close by clicking away enabled, if  you want to  customize the close by clicky away behavior you can do it like so : 
 ```php
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
@@ -99,17 +99,18 @@ public function panel(Panel $panel): Panel
 ```
 
 
-    available options are :
-        - ExtraSmall
-        - Small
-        - Medium
-        - Large
-        - ExtraLarge
-        - TwoExtraLarge
-        - ThreeExtraLarge
-        - FourExtraLarge
-        - FiveExtraLarge
-        ...
+available options are :
+
+- ExtraSmall
+- Small
+- Medium
+- Large
+- ExtraLarge
+- TwoExtraLarge
+- ThreeExtraLarge
+- FourExtraLarge
+- FiveExtraLarge
+    ...
 ### modal position 
 The Global Search Modal Plugin allows you to customize the modal's position using the `position` method. You can define the position of the modal by specifying the top, right, left, right, left, and bottom values. The method supports two formats for specifying the position: numeric values with units and strings with units.
 
