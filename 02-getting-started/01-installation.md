@@ -7,6 +7,7 @@ Follow these steps to install the Global Search Modal Plugin in your Filament ap
 
 This guide provides detailed instructions on installing and using this plugin. Should you have any inquiries, encounter a bug, require support, or wish to submit a feature request, please do not hesitate to contact me at charrafimedfilament@gmail.com
 
+> The plugin’s master branch has supported Filament v4 for a while. I haven’t published an official v4 release yet because I am currently re-writing the entire codebase to address legacy issues. Stay tuned — the v4 release is coming very soon. 
 
 ```bash
     composer require charrafimed/global-search-modal
@@ -37,5 +38,6 @@ If you are developing locally and frequently refreshing or re-seeding your datab
 
 #### Solution:
 To ensure the correct URLs are being used after re-seeding or refreshing data, manually clear your browser's local storage. This will force the application to construct new URLs based on the updated data.
+
 
 This issue should not occur in production environments, as data isn't frequently refreshed or re-seeded.
