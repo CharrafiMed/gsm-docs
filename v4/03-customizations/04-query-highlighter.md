@@ -1,4 +1,11 @@
 ## query highlightation  
+ 
+@blade
+<x-converge::alert type="warning">
+Support Coming soon for v4 
+</x-converge::alert>
+@endblade
+
 You can enable or disable the highlighting of query matches using the `->highlighter()` method. By default, highlighting is enabled.
 
 ```php
