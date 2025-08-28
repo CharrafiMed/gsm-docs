@@ -1,145 +1,144 @@
 
-## Customize modal behaviors
+## Overview
 
-###  Close by escaping
-by default this plugin comes with close-by escaping enabled, if  you want to  customize the close-by escaping behavior you can do it like so : 
+The Global Search Modal Plugin v4 provides a clean, fluent API to customize modal behaviors through the `modal()` method. All configuration is done directly on the plugin instance using named parameters.
+
+## Basic Usage
+
+Configure the modal by calling the `modal()` method on the plugin instance:
+
 ```php
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
- 
+use Filament\Support\Enums\Width;
+
 public function panel(Panel $panel): Panel
 {
     return $panel
-        ...
         ->plugins([
             GlobalSearchModalPlugin::make()
-                ->closeByEscaping(enabled: false)
-        ])
+                ->modal(
+                    width: Width::Large,
+                    hasCloseButton: true,
+                    closedByClickingAway: false,
+                    closedByEscaping: true,
+                    autofocused: true,
+                    slideOver: false
+                )
+        ]);
 }
 ```
-###  Close by clicking away
-by default this plugin comes with a modal that can close by clicking away enabled, if  you want to  customize the close by clicky away behavior you can do it like so : 
-```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
- 
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-            GlobalSearchModalPlugin::make()
-                ->closeByClickingAway(enabled: false)
-        ])
-}
-```
-###  Close button 
-By default, the plugin does not include a close button. To add a close button:
+
+## Configuration Options
+
+### Modal Width
+
+Set the modal width using Filament's `Width` enum:
 
 ```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
- 
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-            GlobalSearchModalPlugin::make()
-                ->closeButton(enabled: true)
-        ])
-}
+GlobalSearchModalPlugin::make()
+    ->modal(width: Width::Large)
 ```
 
-###  Swappable on mobile
-To  disable swiping to close on mobile:
+**Available Width Options:**
 
+*Standard Sizes:*
+- `Width::ExtraSmall` (`xs`)
+- `Width::Small` (`sm`) 
+- `Width::Medium` (`md`)
+- `Width::Large` (`lg`)
+- `Width::ExtraLarge` (`xl`)
+- `Width::TwoExtraLarge` (`2xl`) - *default*
+- `Width::ThreeExtraLarge` (`3xl`)
+- `Width::FourExtraLarge` (`4xl`)
+- `Width::FiveExtraLarge` (`5xl`)
+- `Width::SixExtraLarge` (`6xl`)
+- `Width::SevenExtraLarge` (`7xl`)
+
+*Special Widths:*
+- `Width::Full` (`full`) - Full width
+- `Width::MinContent` (`min`) - Minimum content width
+- `Width::MaxContent` (`max`) - Maximum content width
+- `Width::FitContent` (`fit`) - Fit content width
+- `Width::Prose` (`prose`) - Optimized for reading text
+
+*Screen-Based Widths:*
+- `Width::ScreenSmall` (`screen-sm`) - Small screen width
+- `Width::ScreenMedium` (`screen-md`) - Medium screen width
+- `Width::ScreenLarge` (`screen-lg`) - Large screen width
+- `Width::ScreenExtraLarge` (`screen-xl`) - Extra large screen width
+- `Width::ScreenTwoExtraLarge` (`screen-2xl`) - 2XL screen width
+- `Width::Screen` (`screen`) - Full screen width
+
+### Close Button
+
+Enable or disable the close button:
 
 ```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
- 
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-            GlobalSearchModalPlugin::make()
-                ->SwappableOnMobile(enabled: false)
-        ])
-}
+GlobalSearchModalPlugin::make()
+    ->modal(hasCloseButton: true) // Default: true
 ```
-### Modal slide over 
-by default this plugin comes with a modal centered to the center, however, if  you want to make this modal slide over, you can do it like so : 
+
+To disable the close button:
+
 ```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
- 
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-            GlobalSearchModalPlugin::make()
-                ->slideOver()
-        ])
-}
+GlobalSearchModalPlugin::make()
+    ->modal(hasCloseButton: false)
 ```
-### max width 
-by default this plugin comes with a modal of max-width 2xl (corresponding to tailwind standard), however, if  you want to customize the  modal max-width, you can do it like so :
-you can use the filament core `maxWidth` Enums under namespace ``Filament\Support\Enums\MaxWidth`` 
+
+### Close by Clicking Away
+
+Control whether the modal closes when clicking outside of it:
+
 ```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
-use Filament\Support\Enums\MaxWidth;
-
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-            GlobalSearchModalPlugin::make()
-                ->maxWidth(MaxWidth::TwoExtraLarge) // for example 
-        ])
-}
+GlobalSearchModalPlugin::make()
+    ->modal(closedByClickingAway: true) // Default: true
 ```
 
+To prevent closing by clicking away:
 
-available options are :
-
-- ExtraSmall
-- Small
-- Medium
-- Large
-- ExtraLarge
-- TwoExtraLarge
-- ThreeExtraLarge
-- FourExtraLarge
-- FiveExtraLarge
-    ...
-### modal position 
-The Global Search Modal Plugin allows you to customize the modal's position using the `position` method. You can define the position of the modal by specifying the top, right, left, right, left, and bottom values. The method supports two formats for specifying the position: numeric values with units and strings with units.
-
-#### Example: Customizing the Position
-
-To customize the modal's position, use the `position` method within the `GlobalSearchModalPlugin` instance. You can specify the top and bottom values using the `top` and `right` methods, respectively. The two supported formats are:
-1. **Numeric Values with Units**: Specify the position using a numeric value followed by a unit (e.g., `100, 'px'`).
-2. **String with Units**: Specify the position directly as a string (e.g., `"30px"`).
-#### Usage Example
-
-Here is an example of how to customize the modal's position:
 ```php
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
-use CharrafiMed\GlobalSearchModal\Customization\Position;
-
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ...
-        ->plugins([
-        GlobalSearchModalPlugin::make()
-            ->position(
-                fn (Position $position) => $position
-                    ->top(100, 'px')     // Numeric value with unit
-                    ->right('30rem')     // String with unit
-            )
-    ]);
-}
+GlobalSearchModalPlugin::make()
+    ->modal(closedByClickingAway: false)
 ```
-Both formats are supported, and you can use them interchangeably based on your preference.
 
-**Tip**: This method uses native CSS styling, so you can use any CSS unit with any float value.
+### Close by Escaping
+
+Control whether the modal closes when pressing the Escape key:
+
+```php
+GlobalSearchModalPlugin::make()
+    ->modal(closedByEscaping: true) // Default: true
+```
+
+To disable close by escaping:
+
+```php
+GlobalSearchModalPlugin::make()
+    ->modal(closedByEscaping: false)
+```
+
+### Autofocus
+
+Control whether the modal automatically focuses when opened:
+
+```php
+GlobalSearchModalPlugin::make()
+    ->modal(autofocused: true) // Default: true
+```
+
+To disable autofocus:
+
+```php
+GlobalSearchModalPlugin::make()
+    ->modal(autofocused: false)
+```
+
+### Slide Over Modal
+
+Enable slide-over behavior instead of centered modal:
+
+```php
+GlobalSearchModalPlugin::make()
+    ->modal(slideOver: true) // Default: false
+```
+
