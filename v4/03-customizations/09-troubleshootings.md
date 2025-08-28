@@ -75,3 +75,15 @@ public function panel(Panel $panel): Panel
  needs a fully featured framework for managing docs  [see converge](https://convergephp.com/)
 
 However, this approach can be cumbersome, especially if you have a large project with multiple resources and pages. Additionally, in SPA mode, this solution can cause Filament inputs to behave oddly in the UI.
+
+### Outdated Search Items
+@blade
+<x-converge::alert type="warning">
+If you are developing locally and frequently refreshing or re-seeding your database, please note that the **recent search feature** persists data into local storage. This can result in outdated URLs being used if the underlying data (such as IDs or slugs) has changed.
+</x-converge::alert>
+@endblade
+
+#### Solution:
+To ensure the correct URLs are being used after re-seeding or refreshing data, manually clear your browser's local storage. This will force the application to construct new URLs based on the updated data.
+
+This issue should not occur in production environments, as data isn't frequently refreshed or re-seeded.
