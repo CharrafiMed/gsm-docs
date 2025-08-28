@@ -80,3 +80,14 @@ The Global Search Modal is a powerful and customizable global search plugin for 
 @endblade
 
 
+## About the Maintainer
+
+I’m Mohamed, creator of the **Global Search Modal plugin**, the **ConvergePHP framework**, and **Fluxtor**, the ultimate UI platform for Laravel applications.  
+I specialize in building high-performance, developer-friendly tools that enhance productivity and user experience.  
+
+I am currently **open to work**.
+
+If you’re looking for someone who can architect, optimize, and scale Laravel-based ecosystems to the next level, let’s connect.  
+
+Contact: [charrafimohamed27@gmail.com](mailto:charrafimohamed27@gmail.com)  
+Portfolio: [fluxtor.dev](https://fluxtor.dev) | [convergephp.com](https://convergephp.com) | [charrafimed.com](https://charrafi.com)  
