@@ -185,5 +185,5 @@ use Filament\Actions\Action;
 
 
 The way you configure details and actions is exactly the same as in Filament core: 
-- For [details see](https://filamentphp.com/docs/4.x/resources/global-search#adding-extra-details-to-global-search-results)
-- For [actions see](https://filamentphp.com/docs/4.x/resources/global-search#adding-actions-to-global-search-results)
+- For details see [global-search/details](https://filamentphp.com/docs/4.x/resources/global-search#adding-extra-details-to-global-search-results)
+- For actions see [global-search/actions](https://filamentphp.com/docs/4.x/resources/global-search#adding-actions-to-global-search-results)

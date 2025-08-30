@@ -265,13 +265,11 @@ use Filament\Actions\Action;
             title: $item['title'],
             url: '#',
             details: [
-                'This is a system-level command - be sure before executing'
+                'useless command to go home page'
             ],
             actions: [
-                Action::make('run')
-                    ->label('Execute')
-                    ->action(fn() => Artisan::call($item['action']))
-                    ->requiresConfirmation()
+                Action::make('go home')
+                    ->url('/') 
             ]
         );
     });
@@ -283,6 +281,10 @@ use Filament\Actions\Action;
     return $builder;
 })
 ```
+
+The way you configure details and actions is exactly the same as in Filament core: 
+- For details see [global-search/details](https://filamentphp.com/docs/4.x/resources/global-search#adding-extra-details-to-global-search-results)
+- For actions see [global-search/actions](https://filamentphp.com/docs/4.x/resources/global-search#adding-actions-to-global-search-results)
 
 ## Performance Considerations
 
