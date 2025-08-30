@@ -1,5 +1,6 @@
-# Making Custom Pages Searchable
-
+---
+title: 'making custom pages searchable'
+---
 ## Overview
 
 The plugin searches all resources in your panel by default, but when building custom pages that aren't related to any resource, you might want to make them searchable as well. The plugin provides full flexibility for querying your database and customizing search behavior for custom pages.
@@ -10,7 +11,7 @@ Make sure custom pages search is enabled in your plugin configuration (disabled 
 
 ```php
 GlobalSearchModalPlugin::make()
-    ->->searchCustomPages() // Enable this feature
+    ->searchCustomPages() // Enable this feature
 ```
 
 ## Implementation
@@ -45,7 +46,7 @@ class Settings extends Page implements Searchable
 
 ## Required Methods
 
-- ``getGlobalSearchResults()``
+- `getGlobalSearchResults()`
 
 This method defines what results should be returned for the given search query:
 
@@ -60,14 +61,9 @@ public static function getGlobalSearchResults(string $query): Collection|array
         ->map(function (Model $record): GlobalSearchResult {
             return new GlobalSearchResult(
                 title: $record->title,
-                url: static::generateUrl($record->id),
+                url:  route('settings.show', $id),
             );
         });
-}
-// url generation example 
-protected static function generateUrl(string $id): string
-{
-    return route('settings.show', $id);
 }
 ```
 
@@ -78,8 +74,8 @@ protected static function generateUrl(string $id): string
 - `Collection|array` - Collection of `GlobalSearchResult` objects
 
 
->The part inside `map()` is necessary to build search results in the shape of `GlobalSearchResult`
->every result record must be of type `CharrafiMed\GlobalSearchModal\GlobalSearchResult`  to ensure it aligns with the same data structure used by other resource searches.
+>The part inside `map()` is necessary to build search results in the shape of `GlobalSearchResult`.
+>Every result record must be of type `CharrafiMed\GlobalSearchModal\GlobalSearchResult` to ensure it aligns with the same data structure used by other resource searches.
 
 - `getGlobalSearchGroupName()`
 
@@ -88,7 +84,7 @@ Defines the group name that appears in search results:
 ```php
 public static function getGlobalSearchGroupName(): string
 {
-    return 'Posts'; // This will group results under "Posts" category
+    return 'Settings'; // This will group results under "Settings" category
 }
 ```
 
@@ -122,33 +118,23 @@ return config('features.post_search_enabled', true);
 ```
 
 
-## Url generation
+## URL Generation
 
-Generate URLs for individual search results it's up to you of how you want:
+Generate URLs for individual search results - it's up to you how you want to do this:
 
 ```php
-protected static function generateUrl(string $id): string
-{
-    return route('settings.show', $id);
-}
-```
-
-- **even raw string**
-```php
-protected static function generateUrl(string $id): string
-{
-// Raw string (not recommended for production)
-return "http://127.0.0.1:8000/admin/posts/{$id}";
-}
+    route('settings.show', $id);
+    // Even raw string
+    "http://127.0.0.1:8000/admin/posts/{$id}";
 ```
 
 ## Advanced Examples
 
-> you can use any driver for searching, this gives you 100% flexibity for example let's use simple array and add the clicked recored in the query string, you may grab that query string and active a tab or or any crazy thing
+> You can use any search driver, giving you 100% flexibility. For example, let's use a simple array and add the clicked record to the query string. You can then grab that query string to activate a tab or perform any custom action.
 
 ### Searching Static Content
 ```php
-use use Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 
 public static function getGlobalSearchResults(string $query): Collection
 {
@@ -178,10 +164,26 @@ public static function getGlobalSearchResults(string $query): Collection
 The `GlobalSearchResult` class accepts the following parameters:
 
 ```php
-new GlobalSearchResult(
-    title: 'Result Title',           // Required: Main title
-    url: 'https://example.com',      // Required: URL to navigate to
-    details: ['Detail 1', 'Detail 2'] // Optional: Additional info
-    
-)
+use CharrafiMed\GlobalSearchModal\GlobalSearchResult;
+use Filament\Actions\Action;
+
+->map(function (Model $record): GlobalSearchResult {
+    return new GlobalSearchResult(
+        title: $record->title, // Required: Main title
+        url: static::generateUrl($record->id), // Required: URL to navigate to
+        details: [
+            $record->type,
+            $record->created_at
+        ]
+        actions: [
+            Action::make('edit')
+            ->url(route('settings', ['record' => $record])),
+        ]
+    );
+});
 ```
+
+
+The way you configure details and actions is exactly the same as in Filament core: 
+- For [details see](https://filamentphp.com/docs/4.x/resources/global-search#adding-extra-details-to-global-search-results)
+- For [actions see](https://filamentphp.com/docs/4.x/resources/global-search#adding-actions-to-global-search-results)
