@@ -1,3 +1,7 @@
+---
+title: 'custom search'
+---
+
 # Custom Global Search
 
 ## Overview
