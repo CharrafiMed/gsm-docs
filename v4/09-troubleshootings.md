@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 ## lazy loading issues 
 If you have disabled lazy loading in your service provider, as shown below:
 

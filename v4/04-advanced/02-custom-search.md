@@ -4,12 +4,11 @@
 
 The Custom Global Search feature provides unlimited flexibility to make absolutely anything in your application searchable. Unlike the standard resource-based search, this feature allows you to implement completely custom search logic that can search static content, external APIs, complex database queries, or any other data source imaginable.
 
-## Key Benefits
+## why we need this ? 
 
 - **Universal Search**: Search anything - not just Eloquent models
 - **Complete Control**: Define your own search logic, data sources, and result formatting
 - **Flexible Integration**: Choose to merge with core search results or replace them entirely
-- **Performance Optimized**: Only executes when needed, with proper result limiting
 - **Consistent Interface**: Results integrate seamlessly with existing search UI
 
 ## Basic Configuration
@@ -85,6 +84,8 @@ Perfect for application settings, navigation items, or configuration options:
 Search external services and integrate results into your admin panel:
 
 ```php
+use Illuminate\Support\Facades\Http;
+
 ->searchUsing(function (string $query, GlobalSearchResults $builder) {
     // Search GitHub repositories
     $githubResults = Http::get("https://api.github.com/search/repositories", [
@@ -108,8 +109,10 @@ Search external services and integrate results into your admin panel:
     }
 
     return $builder;
-}, mergeWithCore: true)
+}, mergeWithCore: false) // Modal results will show only this function's builder results
 ```
+
+Now type a query like "global search modal" and you will see the plugin repository shown to you.
 
 ### Complex Database Queries
 
@@ -146,96 +149,10 @@ Search across multiple tables with custom logic:
 })
 ```
 
-## Advanced Examples
-
-### Full-Text Search with Elasticsearch
-
-```php
-->searchUsing(function (string $query, GlobalSearchResults $builder) {
-    $searchResults = Elasticsearch::search([
-        'index' => 'documents',
-        'body' => [
-            'query' => [
-                'multi_match' => [
-                    'query' => $query,
-                    'fields' => ['title^2', 'content', 'tags']
-                ]
-            ],
-            'size' => 20
-        ]
-    ]);
-
-    $results = collect($searchResults['hits']['hits'])->map(function ($hit) {
-        $source = $hit['_source'];
-        return new GlobalSearchResult(
-            title: $source['title'],
-            url: "/admin/documents/{$hit['_id']}",
-            details: [
-                'Score: ' . round($hit['_score'], 2),
-                Str::limit($source['content'], 100)
-            ]
-        );
-    });
-
-    if ($results->count()) {
-        $builder->category('Documents', $results);
-    }
-
-    return $builder;
-})
-```
-
-### Multi-Source Aggregated Search
-
-Search multiple data sources and combine results:
-
-```php
-->searchUsing(function (string $query, GlobalSearchResults $builder) {
-    // Search local database
-    $localUsers = User::where('name', 'like', "%{$query}%")
-        ->limit(5)
-        ->get()
-        ->map(fn($user) => new GlobalSearchResult(
-            title: $user->name,
-            url: "/admin/users/{$user->id}",
-            details: [$user->email, 'Local User']
-        ));
-
-    // Search LDAP directory
-    $ldapUsers = LDAP::search('users', [
-        'filter' => "(cn=*{$query}*)",
-        'limit' => 5
-    ])->map(fn($user) => new GlobalSearchResult(
-        title: $user['cn'][0],
-        url: "/admin/ldap-users/{$user['uid'][0]}",
-        details: [$user['mail'][0], 'LDAP User']
-    ));
-
-    // Search external CRM
-    $crmContacts = Http::get("https://api.crm.com/contacts/search", [
-        'q' => $query,
-        'limit' => 5
-    ])->collect()->map(fn($contact) => new GlobalSearchResult(
-        title: $contact['name'],
-        url: "/admin/crm-contacts/{$contact['id']}",
-        details: [$contact['company'], 'CRM Contact']
-    ));
-
-    $allUsers = $localUsers->merge($ldapUsers)->merge($crmContacts);
-
-    if ($allUsers->count()) {
-        $builder->category('All Users', $allUsers);
-    }
-
-    return $builder;
-})
-```
-
-## Configuration Options
 @blade
 <x-converge::alert type="info">
-    this part all AI docs generated with my refinements and tweacks,it's good exampe to show you the full endless posibilities it gives
-</x-converge::alert >
+    As long as the builder is an instance of `CharrafiMed\GlobalSearchModal\GlobalSearchResults` and results are a collection of `CharrafiMed\GlobalSearchModal\GlobalSearchResult`, the plugin works fine regardless of data source.
+</x-converge::alert>
 @endblade
 
 ### Merge with Core Search
@@ -250,19 +167,68 @@ Search multiple data sources and combine results:
 ->searchUsing($callback, mergeWithCore: false)
 ```
 
-### Multiple Custom Search Sources
+## Advanced Examples
 
-You can combine custom search with other features:
+@blade
+<x-converge::alert type="info">
+    This part is all AI-generated docs with my refinements and tweaks. It's a good example to show you the full endless possibilities it provides.
+</x-converge::alert>
+@endblade
+
+### Using Laravel Scout
+
+Laravel Scout provides a driver-based solution for full-text search. Here's how to integrate it with Custom Global Search:
 
 ```php
-GlobalSearchModalPlugin::make()
-    ->searchCustomPages() // Enable custom pages search
-    ->searchUsing(function (string $query, GlobalSearchResults $builder) {
-        // Your custom global search logic
-        return $builder;
-    }, mergeWithCore: true)
-```
+use App\Models\Post;
+use App\Models\Product;
 
+->searchUsing(function (string $query, GlobalSearchResults $builder) {
+    // Search posts using Scout
+    $posts = Post::search($query)
+        ->take(10)
+        ->get()
+        ->map(function ($post) {
+            return new GlobalSearchResult(
+                title: $post->title,
+                url: "/admin/posts/{$post->id}",
+                details: [
+                    $post->category->name ?? 'Uncategorized',
+                    $post->published_at?->format('M d, Y') ?? 'Draft',
+                    $post->author->name
+                ]
+            );
+        });
+
+    // Search products using Scout with custom scoring
+    $products = Product::search($query)
+        ->query(fn($builder) => $builder->where('active', true))
+        ->take(8)
+        ->get()
+        ->map(function ($product) {
+            return new GlobalSearchResult(
+                title: $product->name,
+                url: "/admin/products/{$product->id}",
+                details: [
+                    $product->category,
+                    '$' . number_format($product->price, 2),
+                    $product->stock > 0 ? 'In Stock' : 'Out of Stock'
+                ]
+            );
+        });
+
+    // Add categories to builder
+    if ($posts->count()) {
+        $builder->category('Blog Posts', $posts);
+    }
+
+    if ($products->count()) {
+        $builder->category('Products', $products);
+    }
+
+    return $builder;
+})
+```
 ## Advanced Patterns
 
 ### Conditional Search Sources
@@ -276,38 +242,6 @@ GlobalSearchModalPlugin::make()
 
     // Always search local static content
     // Static content search logic
-
-    return $builder;
-})
-```
-
-### Weighted Search Results
-
-```php
-->searchUsing(function (string $query, GlobalSearchResults $builder) {
-    $results = collect();
-
-    // High priority: Exact matches
-    if ($exactMatch = Setting::where('key', $query)->first()) {
-        $results->add(new GlobalSearchResult(
-            title: "⭐ " . $exactMatch->name,
-            url: "/admin/settings?highlight={$exactMatch->key}",
-        ));
-    }
-
-    // Medium priority: Partial matches
-    $partialMatches = Setting::where('name', 'like', "%{$query}%")
-        ->get()
-        ->map(fn($setting) => new GlobalSearchResult(
-            title: $setting->name,
-            url: "/admin/settings?highlight={$setting->key}",
-        ));
-
-    $results = $results->merge($partialMatches);
-
-    if ($results->count()) {
-        $builder->category('Settings', $results);
-    }
 
     return $builder;
 })
@@ -330,6 +264,9 @@ use Filament\Actions\Action;
         return new GlobalSearchResult(
             title: $item['title'],
             url: '#',
+            details: [
+                'This is a system-level command - be sure before executing'
+            ],
             actions: [
                 Action::make('run')
                     ->label('Execute')
@@ -346,43 +283,6 @@ use Filament\Actions\Action;
     return $builder;
 })
 ```
-
-## Real-World Use Cases
-
-### 1. **Application Navigation**
-Make any part of your app discoverable through search:
-- Admin settings tabs
-- Dashboard widgets
-- Report sections
-- Help documentation
-
-### 2. **External Integrations**
-Search external services from within your admin:
-- CRM contacts
-- Support tickets
-- GitHub repositories
-- Slack channels
-
-### 3. **System Operations**
-Create searchable admin shortcuts:
-- Cache clearing
-- Database operations
-- Log viewing
-- System monitoring
-
-### 4. **Content Management**
-Search non-model content:
-- Configuration files
-- Static pages
-- Documentation
-- Feature flags
-
-### 5. **Analytics & Reporting**
-Quick access to reports and analytics:
-- Pre-built reports
-- Dashboard views
-- Data exports
-- Performance metrics
 
 ## Performance Considerations
 
@@ -409,13 +309,6 @@ User::whereFullText(['name', 'email'], $query)
 if (strlen($query) < 2) {
     return $builder; // Skip expensive operations for short queries
 }
-```
-
-4. **Cache expensive operations**:
-```php
-$results = Cache::remember("search_external_{$query}", 300, function () use ($query) {
-    return Http::get("https://api.external.com/search?q={$query}");
-});
 ```
 
 ## Error Handling
@@ -449,85 +342,7 @@ $results = Cache::remember("search_external_{$query}", 300, function () use ($qu
 })
 ```
 
-## Integration Examples
-
-
-### Complete Real-World Implementation
-
-```php
-GlobalSearchModalPlugin::make()
-    ->modal(slideOver: true)
-    ->highlightQueryMatches()
-    ->searchCustomPages() // Enable custom pages
-    ->searchUsing(function (string $query, GlobalSearchResults $builder) {
-        
-        // 1. Search application settings
-        $this->searchSettings($query, $builder);
-        
-        // 2. Search external CRM
-        $this->searchCRM($query, $builder);
-        
-        // 3. Search documentation
-        $this->searchDocs($query, $builder);
-        
-        // 4. Search system commands
-        $this->searchCommands($query, $builder);
-
-        return $builder;
-    }, mergeWithCore: true)
-
-private function searchSettings(string $query, GlobalSearchResults $builder): void
-{
-    $settings = [
-        'general' => 'General Configuration',
-        'email' => 'Email Settings',
-        'security' => 'Security Options',
-        'integrations' => 'API Integrations',
-    ];
-
-    $results = collect($settings)
-        ->filter(fn($title) => str_contains(strtolower($title), strtolower($query)))
-        ->map(fn($title, $key) => new GlobalSearchResult(
-            title: $title,
-            url: "/admin/settings?tab={$key}",
-            details: ['System Setting']
-        ));
-
-    if ($results->count()) {
-        $builder->category('Settings', $results);
-    }
-}
-
-private function searchCRM(string $query, GlobalSearchResults $builder): void
-{
-    if (strlen($query) < 3) return; // Skip for short queries
-
-    try {
-        $contacts = Http::timeout(3)
-            ->get("https://api.crm.com/contacts/search?q={$query}")
-            ->collect()
-            ->take(5)
-            ->map(fn($contact) => new GlobalSearchResult(
-                title: $contact['name'],
-                url: "/admin/crm/contacts/{$contact['id']}",
-                details: [
-                    $contact['company'],
-                    $contact['email'],
-                    'CRM Contact'
-                ]
-            ));
-
-        if ($contacts->count()) {
-            $builder->category('CRM Contacts', $contacts);
-        }
-    } catch (\Exception $e) {
-        // Fail silently or add error result
-    }
-}
-```
-
 ## Migration from Standard Search
-
 
 ### Before (Limited to Resources)
 ```php
@@ -558,33 +373,18 @@ class UserResource extends Resource
     $external = $this->searchExternalAPI($query);
     $commands = $this->searchCommands($query);
 
-    $builder->category('Users', $users);
+    if($users->count()){
+        $builder->category('Users', $users);
+    }
+    // ...
     $builder->category('Settings', $settings);
+    //...
     $builder->category('External', $external);
+    //...
     $builder->category('Commands', $commands);
 
     return $builder;
 }, mergeWithCore: false) // Replace default search entirely
-```
-
-## Configuration Patterns
-
-### Environment-Based Search
-
-```php
-->searchUsing(function (string $query, GlobalSearchResults $builder) {
-    // Production: Only search internal resources
-    if (app()->isProduction()) {
-        return $this->searchInternalOnly($query, $builder);
-    }
-
-    // Development: Include debug tools and external APIs
-    $this->searchInternalOnly($query, $builder);
-    $this->searchDebugTools($query, $builder);
-    $this->searchExternalAPIs($query, $builder);
-
-    return $builder;
-})
 ```
 
 ### Role-Based Search Results
@@ -611,30 +411,6 @@ class UserResource extends Resource
     return $builder;
 })
 ```
-
-## Best Practices
-
-### 1. Performance Optimization
-- Always limit results (`->limit()`, `->take()`)
-- Use database indexes for searched columns
-- Implement query length minimums for expensive operations
-- Cache external API results when possible
-
-### 2. User Experience
-- Provide meaningful result details
-- Use clear, descriptive category names
-- Include relevant actions where appropriate
-- Handle empty results gracefully
-
-### 3. Error Handling
-- Wrap external calls in try-catch blocks
-- Provide fallback results when external services fail
-- Log errors for debugging without breaking search
-
-### 4. Security
-- Validate and sanitize search queries
-- Respect user permissions and roles
-- Don't expose sensitive information in search results
 
 ## Common Patterns
 
@@ -673,10 +449,3 @@ foreach ($strategies as $strategy) {
         $builder->category($strategy->getCategoryName(), $results);
     }
 }
-```
-
-## Conclusion
-
-The Custom Global Search feature transforms your admin panel into a universal search interface. Whether you're searching database records, external APIs, static content, or system commands, this feature provides the flexibility to make everything discoverable through a single, consistent interface.
-
-The key is that you're no longer limited to just Eloquent models - you can search absolutely anything and present it through the familiar global search interface that your users already know and love.
